@@ -1,9 +1,34 @@
-# WTWR (What to Wear?): Back End
-The back-end project is focused on creating a server for the WTWR application. You’ll gain a deeper understanding of how to work with databases, set up security and testing, and deploy web applications on a remote machine. The eventual goal is to create a server with an API and user authorization.
-## Running the Project
-`npm run start` — to launch the server 
+# WTWR (What to Wear?) — Back End
 
-`npm run dev` — to launch the server with the hot reload feature
+This is the back-end for the WTWR app. It’s a Node.js/Express server with MongoDB that handles users and clothing items. You can create, read, update, delete, and like/unlike items.
 
-### Testing
-Before committing your code, make sure you edit the file `sprint.txt` in the root folder. The file `sprint.txt` should contain the number of the sprint you're currently working on. For ex. 12
+---
+
+## What it does
+
+- **Users**
+  - `POST /users` → add a user
+  - `GET /users` → get all users
+  - `GET /users/:userId` → get a single user
+
+- **Clothing Items**
+  - `POST /items` → add an item
+  - `GET /items` → list all items
+  - `PUT /items/:itemId` → update an item’s image
+  - `DELETE /items/:itemId` → remove an item
+  - `PUT /items/:itemId/likes` → like
+  - `DELETE /items/:itemId/likes` → unlike
+
+---
+
+## Tech stack
+
+- Node.js + Express
+- MongoDB + Mongoose
+- Validator for URL checks
+- ESLint (Airbnb + Prettier) for clean code
+- Nodemon + Postman for dev and testing
+
+## Server Config
+
+By default the server runs on **PORT 3001** and connects to: mongodb://127.0.0.1:27017/wtwr_db
