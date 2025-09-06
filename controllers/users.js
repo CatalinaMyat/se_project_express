@@ -5,16 +5,19 @@ const {
   INTERNAL_SERVER_ERROR,
 } = require("../utils/errors");
 
-// GET
+const sendServerError = (res) =>
+  res
+    .status(INTERNAL_SERVER_ERROR)
+    .send({ message: "An error has occurred on the server" });
+
+// GET /users
 const getUsers = (req, res) => {
   User.find({})
     .then((users) => res.status(200).send(users))
-    .catch((err) =>
-      res.status(INTERNAL_SERVER_ERROR).send({ message: err.message }),
-    );
+    .catch(() => sendServerError(res));
 };
 
-// POST
+// POST /users
 const createUser = (req, res) => {
   const { name, avatar } = req.body;
 
@@ -22,9 +25,9 @@ const createUser = (req, res) => {
     .then((user) => res.status(201).send(user))
     .catch((err) => {
       if (err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).send({ message: err.message });
+        return res.status(BAD_REQUEST).send({ message: "Invalid data" });
       }
-      return res.status(INTERNAL_SERVER_ERROR).send({ message: err.message });
+      return sendServerError(res);
     });
 };
 
@@ -42,7 +45,7 @@ const getUser = (req, res) => {
       if (err.name === "CastError") {
         return res.status(BAD_REQUEST).send({ message: "Invalid user id" });
       }
-      return res.status(INTERNAL_SERVER_ERROR).send({ message: err.message });
+      return sendServerError(res);
     });
 };
 
