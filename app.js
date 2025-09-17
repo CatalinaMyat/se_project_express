@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const routes = require("./routes"); // index.js is implied
+const cors = require("cors");
+const routes = require("./routes");
 
 const app = express();
 const { PORT = 3001 } = process.env;
@@ -10,16 +11,13 @@ mongoose
   .then(() => {
     console.log("Connected to DB");
   })
-  .catch((e) => console.error(e));
+  .catch((e) => {
+    console.error(e);
+  });
+
+app.use(cors());
 
 app.use(express.json());
-
-// temporary auth middleware (must be before routes)
-app.use((req, res, next) => {
-  req.user = { _id: "000000000000000000000001" };
-  next();
-});
-
 app.use("/", routes);
 
 app.listen(PORT, () => {

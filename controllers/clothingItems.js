@@ -2,6 +2,7 @@ const ClothingItem = require("../models/clothingItem");
 const {
   BAD_REQUEST,
   NOT_FOUND,
+  FORBIDDEN,
   INTERNAL_SERVER_ERROR,
 } = require("../utils/errors");
 
@@ -10,7 +11,7 @@ const sendServerError = (res) =>
     .status(INTERNAL_SERVER_ERROR)
     .send({ message: "An error has occurred on the server" });
 
-// POST /items
+// POST
 const createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
 
@@ -29,20 +30,29 @@ const createItem = (req, res) => {
     });
 };
 
-// GET /items
+// GET
 const getItems = (req, res) => {
   ClothingItem.find({})
     .then((items) => res.status(200).send(items))
     .catch(() => sendServerError(res));
 };
 
-// DELETE /items/:itemId
+// DELETE
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
 
-  ClothingItem.findByIdAndDelete(itemId)
+  ClothingItem.findById(itemId)
     .orFail()
-    .then(() => res.status(204).send({}))
+    .then((item) => {
+      if (String(item.owner) !== String(req.user._id)) {
+        return res
+          .status(FORBIDDEN)
+          .send({ message: "Forbidden: you can delete only your own items" });
+      }
+      return ClothingItem.findByIdAndDelete(itemId).then(() =>
+        res.status(200).send({ message: "Item deleted" }),
+      );
+    })
     .catch((err) => {
       if (err.name === "CastError") {
         return res.status(BAD_REQUEST).send({ message: "Invalid item id" });
@@ -54,7 +64,7 @@ const deleteItem = (req, res) => {
     });
 };
 
-// PUT /items/:itemId/likes
+// PUT
 const likeItem = (req, res) => {
   const { itemId } = req.params;
 
@@ -76,7 +86,7 @@ const likeItem = (req, res) => {
     });
 };
 
-// DELETE /items/:itemId/likes
+// DELETE
 const unlikeItem = (req, res) => {
   const { itemId } = req.params;
 
