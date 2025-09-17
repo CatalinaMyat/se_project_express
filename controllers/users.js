@@ -5,6 +5,8 @@ const { JWT_SECRET } = require("../utils/config");
 const {
   BAD_REQUEST,
   NOT_FOUND,
+  UNAUTHORIZED,
+  CONFLICT,
   INTERNAL_SERVER_ERROR,
 } = require("../utils/errors");
 
@@ -12,12 +14,6 @@ const sendServerError = (res) =>
   res
     .status(INTERNAL_SERVER_ERROR)
     .send({ message: "An error has occurred on the server" });
-
-const getUsers = (req, res) => {
-  User.find({})
-    .then((users) => res.status(200).send(users))
-    .catch(() => sendServerError(res));
-};
 
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
@@ -48,7 +44,7 @@ const createUser = (req, res) => {
     )
     .catch((err) => {
       if (err.code === 11000) {
-        return res.status(409).send({ message: "Email already exists" });
+        return res.status(CONFLICT).send({ message: "Email already exists" });
       }
       if (err.name === "ValidationError") {
         return res.status(BAD_REQUEST).send({ message: "Invalid data" });
@@ -68,12 +64,12 @@ const login = (req, res) => {
       return res.send({ token });
     })
     .catch(() =>
-      res.status(401).send({ message: "Incorrect email or password" }),
+      res.status(UNAUTHORIZED).send({ message: "Incorrect email or password" }),
     );
 };
 
 const getCurrentUser = (req, res) => {
-  User.findById(req.user._id)
+  return User.findById(req.user._id)
     .select("-password")
     .then((user) => {
       if (!user) {
@@ -92,7 +88,7 @@ const getCurrentUser = (req, res) => {
 const updateProfile = (req, res) => {
   const { name, avatar } = req.body;
 
-  User.findByIdAndUpdate(
+  return User.findByIdAndUpdate(
     req.user._id,
     { name, avatar },
     { new: true, runValidators: true },
@@ -113,7 +109,6 @@ const updateProfile = (req, res) => {
 };
 
 module.exports = {
-  getUsers,
   createUser,
   login,
   getCurrentUser,

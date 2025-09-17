@@ -1,23 +1,27 @@
 # WTWR (What to Wear?) — Back End
 
-This is the back-end for the WTWR app. It’s a Node.js/Express server with MongoDB that handles users and clothing items. You can create, read, update, delete, and like/unlike items.
+Node.js/Express server with MongoDB for users and clothing items: create, read, delete, and like/unlike items. JWT auth protects most routes.
 
 ---
 
-## What it does
+## API
 
-- **Users**
-  - `POST /users` → add a user
-  - `GET /users` → get all users
-  - `GET /users/:userId` → get a single user
+### Users
 
-- **Clothing Items**
-  - `POST /items` → add an item
-  - `GET /items` → list all items
-  - `PUT /items/:itemId` → update an item’s image
-  - `DELETE /items/:itemId` → remove an item
-  - `PUT /items/:itemId/likes` → like
-  - `DELETE /items/:itemId/likes` → unlike
+- `POST /signup` — register a new user
+- `POST /signin` — sign in (returns JWT)
+- `GET /users/me` — get current user
+- `PATCH /users/me` — update current user (name, avatar)
+
+### Clothing Items
+
+- `POST /items` — add an item
+- `GET /items` — list all items
+- `DELETE /items/:itemId` — remove an item (owner only)
+- `PUT /items/:itemId/likes` — like
+- `DELETE /items/:itemId/likes` — unlike
+
+> Auth: except for `/signup` and `/signin`, send `Authorization: Bearer <token>`.
 
 ---
 
@@ -25,10 +29,15 @@ This is the back-end for the WTWR app. It’s a Node.js/Express server with Mong
 
 - Node.js + Express
 - MongoDB + Mongoose
-- Validator for URL checks
-- ESLint (Airbnb + Prettier) for clean code
-- Nodemon + Postman for dev and testing
+- validator for URL checks
+- ESLint (Airbnb + Prettier)
+- Nodemon + Postman for dev/testing
 
-## Server Config
+## Server config
 
-By default the server runs on **PORT 3001** and connects to: mongodb://127.0.0.1:27017/wtwr_db
+By default the server runs on **PORT 3001** and connects to:
+`mongodb://127.0.0.1:27017/wtwr_db`
+
+## Error codes
+
+Centralized in `utils/errors.js`: `400 BAD_REQUEST`, `401 UNAUTHORIZED`, `403 FORBIDDEN`, `404 NOT_FOUND`, `409 CONFLICT`, `500 INTERNAL_SERVER_ERROR`.
