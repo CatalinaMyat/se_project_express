@@ -56,20 +56,33 @@ const createUser = (req, res) => {
 const login = (req, res) => {
   const { email, password } = req.body;
 
+  if (!email || !password) {
+    return res
+      .status(BAD_REQUEST)
+      .send({ message: "Email and password are required" });
+  }
+
   return User.findUserByCredentials(email, password)
-    .then((user) => {
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
-        expiresIn: "7d",
-      });
-      return res.send({ token });
-    })
-    .catch(() =>
-      res.status(UNAUTHORIZED).send({ message: "Incorrect email or password" }),
-    );
+    .then((user) =>
+      res.send({
+        token: jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: "7d" }),
+      }),
+    )
+    .catch((err) => {
+      if (
+        err?.message === "Incorrect email or password" ||
+        err?.message?.includes("Incorrect email or password")
+      ) {
+        return res
+          .status(UNAUTHORIZED)
+          .send({ message: "Incorrect email or password" });
+      }
+      return sendServerError(res);
+    });
 };
 
-const getCurrentUser = (req, res) => {
-  return User.findById(req.user._id)
+const getCurrentUser = (req, res) =>
+  User.findById(req.user._id)
     .select("-password")
     .then((user) => {
       if (!user) {
@@ -83,7 +96,6 @@ const getCurrentUser = (req, res) => {
       }
       return sendServerError(res);
     });
-};
 
 const updateProfile = (req, res) => {
   const { name, avatar } = req.body;
