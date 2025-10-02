@@ -1,3 +1,4 @@
+// controllers/clothingItems.js
 const ClothingItem = require("../models/clothingItem");
 const {
   BAD_REQUEST,
@@ -11,7 +12,7 @@ const sendServerError = (res) =>
     .status(INTERNAL_SERVER_ERROR)
     .send({ message: "An error has occurred on the server" });
 
-// POST
+// POST /items
 const createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
 
@@ -30,14 +31,14 @@ const createItem = (req, res) => {
     });
 };
 
-// GET
+// GET /items
 const getItems = (req, res) => {
   ClothingItem.find({})
     .then((items) => res.status(200).send(items))
     .catch(() => sendServerError(res));
 };
 
-// DELETE
+// DELETE /items/:itemId
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
 
@@ -64,7 +65,7 @@ const deleteItem = (req, res) => {
     });
 };
 
-// PUT
+// PUT /items/:itemId/likes
 const likeItem = (req, res) => {
   const { itemId } = req.params;
 
@@ -86,7 +87,7 @@ const likeItem = (req, res) => {
     });
 };
 
-// DELETE
+// DELETE /items/:itemId/likes
 const unlikeItem = (req, res) => {
   const { itemId } = req.params;
 
