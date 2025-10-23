@@ -2,7 +2,11 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const { errors } = require("celebrate");
 const routes = require("./routes");
+const { requestLogger, errorLogger } = require("./middlewares/logger"); // added import
+
+// (blank line to satisfy import/newline-after-import)
 
 const app = express();
 const { PORT = 3001 } = process.env;
@@ -10,6 +14,7 @@ const { PORT = 3001 } = process.env;
 mongoose
   .connect("mongodb://127.0.0.1:27017/wtwr_db")
   .then(() => {
+    // eslint-disable-next-line no-console
     console.log("Connected to DB");
   })
   .catch((e) => {
@@ -31,8 +36,23 @@ app.use(
 // NOTE: Do NOT add app.options("*", cors()); — it crashes with your stack.
 
 app.use(express.json());
+
+// request logger FIRST (added line)
+app.use(requestLogger);
+
 app.use("/", routes);
 
+// error logger AFTER routes, BEFORE error handlers (added line)
+app.use(errorLogger);
+
+app.use(errors()); // celebrate validation errors
+
+// central error handler
+const errorHandler = require("./middlewares/error-handler");
+
+app.use(errorHandler);
+
 app.listen(PORT, () => {
+  // eslint-disable-next-line no-console
   console.log(`Listening on port ${PORT}`);
 });
