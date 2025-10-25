@@ -27,11 +27,25 @@ mongoose
  * Explicit CORS for React dev server (http://localhost:3000)
  * Allows auth header for Bearer tokens and standard methods.
  */
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://localhost:3000",
+  "https://wtwr-myo.root.sx",
+];
+
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin(origin, callback) {
+      // allow requests with no origin (like mobile apps or curl)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "authorization"],
+    credentials: true,
   }),
 );
 
